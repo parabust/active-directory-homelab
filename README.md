@@ -3,7 +3,9 @@
 # 0 - VM Environment Setup
 
 **1. Install VirtualBox**
+
 **2. Install Windows Server 2022 as a VM**
+
 **3. Install Windows 11 Pro as a VM (NOT ABLE TO JOIN A DOMAIN ON HOME VERSION)**
 
 # 1 - Domain Controller Setup (Windows Server)
