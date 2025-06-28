@@ -26,8 +26,7 @@ Install the forest:
 ```shell
 Install-ADDSForest
 ```
-
-Pick a domain name and safe mode administrator password.
+Pick a domain name and safe-mode administrator password.
 
 # 2 - Configuring DNS for Both Machines
 
@@ -49,7 +48,7 @@ Repeat the same steps from configuring the Windows Server 2022's DNS
 
 # 3 - Join Windows 11 Machine to the Domain
 
-**1. On the Windows 11 machine, run this command and then use the domain controller's credentials:
+**1. On the Windows 11 machine, run this command and then use the domain controller's credentials:**
 ```shell
 Add-Computer -DomainName {Domain Name} -Credential {Domain}\{Username} -Force -Restart
 ```
