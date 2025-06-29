@@ -1,0 +1,28 @@
+{
+    "domain": "abc.com",
+
+    "groups": [
+        {
+            "name": "group1"
+        }
+    ],
+
+    "users": [
+        {
+            "name": "eggs benedict",
+            "username": "eggsbenedict",
+            "password": "Password123.",
+            "groups": [
+                "group1"
+            ]
+        },
+        {
+            "name": "toast mcbutter",
+            "username": "toasty",
+            "password": "password456R.",
+            "groups": [
+                "group1"
+            ]    
+        }
+    ]
+}
