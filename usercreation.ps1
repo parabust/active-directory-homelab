@@ -1,11 +1,15 @@
 param([Parameter(Mandatory = $true)] $jsonFile)
 
-$json = (Get-Contents $jsonFile | ConvertFrom-JSON)
+$json = (Get-Content $jsonFile | ConvertFrom-JSON)
 $domain = $json.domain
 
 foreach ($group in $json.groups) {
     $name = $group.name
-    New-ADGroup -Name $name -GroupScope Global
+    try {
+        Get-ADGroup -Identity "$name" -ErrorAction Stop
+    } catch {
+        New-ADGroup -Name $name -GroupScope Global
+    }
 }
 
 foreach ($user in $json.users) {
@@ -16,9 +20,17 @@ foreach ($user in $json.users) {
     $principalName = $username
     $firstName, $lastName = $name.split(" ")
 
-    New-ADUser -Name "$name" -GivenName $firstName -Surname $lastName -SamAccountName $samAccountName -UserPrincipalName $principalName@$domain -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -PassThru | Enable-ADAccount
-
+    try {
+        Get-ADUser -Identity "$username" -ErrorAction Stop
+    } catch {
+        New-ADUser -Name "$name" -GivenName $firstName -Surname $lastName -SamAccountName $samAccountName -UserPrincipalName $principalName@$domain -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -PassThru | Enable-ADAccount
+    }
     foreach ($groupName in $user.groups) {
-        Add-ADGroupMember -Identity $groupName -Members $username
+        try {
+            Get-ADGroup -Identity "$name" -ErrorAction Stop
+            Add-ADGroupMember -Identity $groupName -Members $username
+        } catch {
+            Write-Host "$group group doesn't exist"
+        }
     }
 }
