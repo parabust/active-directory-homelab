@@ -1,9 +1,15 @@
-param([Parameter(Mandatory = $true)][string] $domainControllerIP)
+param(
+[Parameter(Mandatory = $true)][string] $domainControllerIP,
+[Parameter(Mandatory = $true)][string] $domainControllerUsername,
+[Parameter(Mandatory = $true)][SecureString] $domainControllerPassword,
+[Parameter(Mandatory = $true)][string] $domainName, 
+[Parameter(Mandatory = $true)][SecureString] $safeModeAdminPassword)
 Enable-PSRemoting -Force
 Start-Service WinRM
 Set-Item wsman:\localhost\Client\TrustedHosts -value $domainControllerIP -Force
 
-$session = New-PSSession -ComputerName $domainControllerIP -Credential (Get-Credential)
+$credentials = New-Object System.Management.Automation.PSCredential($domainControllerUsername, $domainControllerPassword)
+$session = New-PSSession -ComputerName $domainControllerIP -Credential $credentials
 
 $sessionAdminStatus = [bool] (Invoke-Command -Session $session -ScriptBlock {
     (net localgroup administrators) -contains (whoami).split("\")[-1]
@@ -15,15 +21,15 @@ if ($sessionAdminStatus -eq $false) {
 
 Invoke-Command -Session $session -ScriptBlock {
     if ((Get-WindowsFeature -Name AD-Domain-Services).InstallState -eq "Available") {
-        Install-WindowsFeature AD-Domain-Services -IncludeManagementTools -Force
+        Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
         Import-Module ADDSDeployment
-        Install-ADDSForest
+        Install-ADDSForest -DomainName $domainName -InstallDNS -SafeModeAdministatorPassword $safeModeAdminPassword -Force
     }
 }
 
-$testConnectionCounter = 1
 $continueTestConnection = $true
 while ($continueTestConnection -eq $true) {
+    $testConnectionCounter = 1
     while ($testConnectionCounter -le 10) {
         $testConnection = Test-NetConnection -ComputerName $domainControllerIP
         if ($testConnection.PingSucceeded -eq $true) {
@@ -39,11 +45,9 @@ while ($continueTestConnection -eq $true) {
     if ($continueTestConnectionChoice.toLower() -ne "y") {
         exit
     }
-    $testConnectionCounter = 1   
 }
 
-$domain = [string] (Invoke-Command -Session $session -ScriptBlock {
-    (Get-ADDomain).DNSRoot
-})
-Add-Computer -DomainName $domain -Credential ($domain.split(".")[0] + "\") -Force -Restart
+$updatedCredentials = New-Object System.Management.Automation.PSCredential(($domainName.split(".")[0] + "\") + $domainControllerUsername, $domainControllerPassword)
+
+Add-Computer -DomainName $domainName -Credential $updatedCredentials -Force -Restart
 
