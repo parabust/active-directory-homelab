@@ -40,14 +40,16 @@ while ($continueTestConnection -eq $true) {
         Write-Host "Attempting reconnect to domain controller.. ($($testConnectionCounter))"
         $testConnectionCounter++
     }
-    Write-Host "Couldn't reconnect to domain controller, maybe slow restart or DNS issue?"
-    $continueTestConnectionChoice = Read-Host "Retry connection to domain controller? ('y' to retry)"
-    if ($continueTestConnectionChoice.toLower() -ne "y") {
-        exit
+    if ($continueTestConnection -eq $true) {
+        Write-Host "Couldn't reconnect to domain controller, maybe slow restart or DNS issue?"
+        $continueTestConnectionChoice = Read-Host "Retry connection to domain controller? ('y' to retry)"
+        if ($continueTestConnectionChoice.toLower() -ne "y") {
+            exit
+        }
     }
 }
 
-$updatedCredentials = New-Object System.Management.Automation.PSCredential(($domainName.split(".")[0] + "\") + $domainControllerUsername, $domainControllerPassword)
+$updatedCredentials = New-Object System.Management.Automation.PSCredential(($domainName.split(".")[0] + "\" + $domainControllerUsername), $domainControllerPassword)
 
 Add-Computer -DomainName $domainName -Credential $updatedCredentials -Force -Restart
 
