@@ -28,9 +28,20 @@ Install-ADDSForest
 ```
 Pick a domain name and safe-mode administrator password.
 
-# 2 - Configuring DNS for Both Machines
+# 2 - Configuring IPs and DNS for Both Machines
 
-**1. Set Windows server DNS to its own IPv4 address**
+**1. Configure IP and DNS for the Windows Server Machine**
+
+Retrieve network adapter information:
+```shell
+netsh interface ipv4 show interfaces
+```
+When using VirtualBox, the machines will be using Ethernet.
+
+Change the IP address of the Windows server to a static IPv4 address:
+```shell
+netsh interface ipv4 set address name="{Interface Name}" static {IP Address} {Subnet Mask} {Default Gateway}
+```
 
 Find network interface index for the network adapter:
 ```shell
