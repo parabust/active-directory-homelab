@@ -23,6 +23,14 @@
             "groups": [
                 "group1"
             ]    
+        },
+        {
+            "name": "hall way",
+            "username": "hallwaydude",
+            "password": "ihatehallways",
+            "groups": [
+                "group1"
+            ]    
         }
     ]
 }

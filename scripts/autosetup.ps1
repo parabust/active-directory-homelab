@@ -20,12 +20,19 @@ if ($sessionAdminStatus -eq $false) {
 }
 
 Invoke-Command -Session $session -ScriptBlock {
+    param(
+        [string] $domainName,
+        [SecureString] $safeModeAdminPassword
+    )
+
     if ((Get-WindowsFeature -Name AD-Domain-Services).InstallState -eq "Available") {
         Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
         Import-Module ADDSDeployment
-        Install-ADDSForest -DomainName $domainName -InstallDNS -SafeModeAdministatorPassword $safeModeAdminPassword -Force
+        Install-ADDSForest -DomainName $domainName -InstallDNS -SafeModeAdministratorPassword $safeModeAdminPassword -Force
     }
-}
+} -ArgumentList $domainName, $safeModeAdminPassword
+
+$updatedCredentials = New-Object System.Management.Automation.PSCredential(($domainName.split(".")[0] + "\" + $domainControllerUsername), $domainControllerPassword)
 
 $continueTestConnection = $true
 while ($continueTestConnection -eq $true) {
@@ -49,7 +56,4 @@ while ($continueTestConnection -eq $true) {
     }
 }
 
-$updatedCredentials = New-Object System.Management.Automation.PSCredential(($domainName.split(".")[0] + "\" + $domainControllerUsername), $domainControllerPassword)
-
 Add-Computer -DomainName $domainName -Credential $updatedCredentials -Force -Restart
-
