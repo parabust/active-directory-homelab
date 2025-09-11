@@ -65,6 +65,13 @@ Add-Computer -DomainName {Domain Name} -Credential {Domain}\{Username} -Force -R
 ```
 When inputting the domain name with the username for the credential field, ensure you don't include the top level domain. (e.g. .com, .org). If the domain name is domain.com as an example, then it would be domain\User1231.
 
+# 4 - Add user(s) to the Domain
+
+**1. On the Windows Server machine, add any amount of users with this command:**
+```shell
+New-ADUser -Name {Name} -GivenName {First Name} -Surname {Last Name} -SamAccountName {Username} -UserPrincipalName {Username}@{Domain} -AccountPassword (ConvertTo-SecureString {Password} -AsPlainText -Force) -PassThru | Enable-ADAccount
+```
+
 # Troubleshooting
 
 Check that your domain controller is running.
